@@ -1,3 +1,14 @@
+Original work by AaronLiddiment: https://github.com/AaronLiddiment/RGBLEDS
+
+This branch is made to work with RGBShades using Teensy.
+
+More info regarding RGBShades: https://www.kickstarter.com/projects/macetech/rgb-led-shades
+
+More info regarding Teensy: https://www.pjrc.com/
+
+
+========================
+
 cLEDSprites Instructions
 ========================
 Will be added soon I hope, for now see examples provided.

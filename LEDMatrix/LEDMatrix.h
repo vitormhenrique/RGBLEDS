@@ -58,31 +58,74 @@ template<int16_t tWidth, int16_t tHeight, MatrixType_t tMType> class cLEDMatrix 
       m_Type = tMType;
       m_LED = p_LED;
     }
+    // virtual uint16_t mXY(uint16_t x, uint16_t y)
+    // {
+    //   if (tWidth < 0)
+    //     x = (m_absWidth - 1) - x;
+    //   if (tHeight < 0)
+    //     y = (m_absHeight - 1) - y;
+    //   if (tMType == HORIZONTAL_MATRIX)
+    //     return((y * m_absWidth) + x);
+    //   else if (tMType == VERTICAL_MATRIX)
+    //     return((x * m_absHeight) + y);
+    //   else if (tMType == HORIZONTAL_ZIGZAG_MATRIX)
+    //   {
+    //     if (y % 2)
+    //       return((((y + 1) * m_absWidth) - 1) - x);
+    //     else
+    //       return((y * m_absWidth) + x);
+    //   }
+    //   else /* if (tMType == VERTICAL_ZIGZAG_MATRIX) */
+    //   {
+    //     if (x % 2)
+    //       return((((x + 1) * m_absHeight) - 1) - y);
+    //     else
+    //       return((x * m_absHeight) + y);
+    //   }
+    // }
+    static const uint8_t kMatrixWidth = 16;
+    static const uint8_t kMatrixHeight = 5;
+
+    // Pixel layout
+    //
+    //      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+    //   +------------------------------------------------
+    // 0 |  .  0  1  2  3  4  5  6  7  8  9 10 11 12 13  .
+    // 1 | 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14
+    // 2 | 30 31 32 33 34 35 36  .  . 37 38 39 40 41 42 43
+    // 3 | 57 56 55 54 53 52 51  .  . 50 49 48 47 46 45 44
+    // 4 |  . 58 59 60 61 62  .  .  .  . 63 64 65 66 67  .
+
+    #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
+    CRGB leds[ NUM_LEDS ];
+
+
+    // This function will return the right 'led index number' for 
+    // a given set of X and Y coordinates on your RGB Shades. 
+    // This code, plus the supporting 80-byte table is much smaller 
+    // and much faster than trying to calculate the pixel ID with code.
+    #define LAST_VISIBLE_LED 67
     virtual uint16_t mXY(uint16_t x, uint16_t y)
     {
-      if (tWidth < 0)
-        x = (m_absWidth - 1) - x;
-      if (tHeight < 0)
-        y = (m_absHeight - 1) - y;
-      if (tMType == HORIZONTAL_MATRIX)
-        return((y * m_absWidth) + x);
-      else if (tMType == VERTICAL_MATRIX)
-        return((x * m_absHeight) + y);
-      else if (tMType == HORIZONTAL_ZIGZAG_MATRIX)
-      {
-        if (y % 2)
-          return((((y + 1) * m_absWidth) - 1) - x);
-        else
-          return((y * m_absWidth) + x);
+      // any out of bounds address maps to the first hidden pixel
+      if( (x >= kMatrixWidth) || (y >= kMatrixHeight) ) {
+        return (LAST_VISIBLE_LED + 1);
       }
-      else /* if (tMType == VERTICAL_ZIGZAG_MATRIX) */
-      {
-        if (x % 2)
-          return((((x + 1) * m_absHeight) - 1) - y);
-        else
-          return((x * m_absHeight) + y);
-      }
+
+      const uint16_t ShadesTable[] = {
+        74, 58, 59, 60, 61, 62, 75, 76, 77, 78, 63, 64, 65, 66, 67, 79,
+        57, 56, 55, 54, 53, 52, 51, 72, 73, 50, 49, 48, 47, 46, 45, 44,
+        30, 31, 32, 33, 34, 35, 36, 70, 71, 37, 38, 39, 40, 41, 42, 43,
+        29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14,
+        68,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 69       
+      };
+
+      uint16_t i = (y * kMatrixWidth) + x;
+      uint16_t j = ShadesTable[i];
+      return j;
     }
+
+
 
     void ShiftLeft(void)
     {
